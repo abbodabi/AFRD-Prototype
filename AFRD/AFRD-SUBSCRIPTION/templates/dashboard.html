@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Automated Fake Review Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: #111827;
+            padding: 15px 30px;
+            color: white;
+        }
+
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary:hover { background: #d1d5db; }
+        .btn-danger:hover { background: #b91c1c; }
+
+        .dashboard-container {
+            padding: 30px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+        }
+
+        /* CARDS */
+        .status-card,
+        .action-card,
+        .stat-card,
+        .upgrade-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .actions-grid,
+        .stats-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .action-icon {
+            font-size: 28px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        /* PROGRESS BAR */
+        .progress-bar {
+            background: #e5e7eb;
+            border-radius: 8px;
+            height: 10px;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            background: #2563eb;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .expired {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .upgrade-section {
+            margin-top: 30px;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            text-align: center;
+            background: #111827;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="navbar-container">
+        <h1>🔍 Fake Review Detector</h1>
+        {% if user %}
+        <div>
+            <span style="margin-right:15px;">{{ user }}</span>
+            <a href="/logout" class="btn-secondary">Logout</a>
+        </div>
+        {% else %}
+        <a href="/login" class="btn-secondary">Login</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="dashboard-container">
+
+{% if user %}
+
+<h1>Welcome to Your Dashboard</h1>
+
+<section>
+    <div class="status-card" id="statusCard">
+        Loading subscription information...
+    </div>
+</section>
+
+<section>
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+        <div class="action-card">
+            <div class="action-icon">📊</div>
+            <h3>Analyze Reviews</h3>
+            <p>Detect fake reviews instantly.</p>
+            <button class="btn-secondary">Open Tool</button>
+        </div>
+
+        <div class="action-card">
+            <div class="action-icon">📈</div>
+            <h3>View Analytics</h3>
+            <p>See detection reports.</p>
+            <button class="btn-secondary">View Reports</button>
+        </div>
+
+        <div class="action-card">
+            <div class="action-icon">⚙️</div>
+            <h3>Settings</h3>
+            <p>Manage your account.</p>
+            <button class="btn-secondary">Settings</button>
+        </div>
+
+        <div class="action-card">
+            <div class="action-icon">💬</div>
+            <h3>Support</h3>
+            <p>Need help? Contact us.</p>
+            <button class="btn-secondary">Contact</button>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2>Your Usage Statistics</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="reviewsAnalyzed">0</div>
+            <div>Reviews Analyzed</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number" id="fakeDetected">0</div>
+            <div>Fake Reviews Detected</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number" id="detectionRate">0%</div>
+            <div>Detection Rate</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number" id="apiCalls">0</div>
+            <div>API Calls Made</div>
+        </div>
+    </div>
+</section>
+
+<section class="upgrade-section" id="upgradeSection" style="display:none;">
+    <div class="upgrade-card">
+        <h2>Upgrade Your Plan</h2>
+        <p>Your subscription is expiring soon.</p>
+        <a href="/" class="btn-primary">View Plans</a>
+    </div>
+</section>
+
+{% else %}
+<h1>Please Login to Access Dashboard</h1>
+<a href="/login" class="btn-primary">Login</a>
+{% endif %}
+
+</div>
+
+<footer>
+    © 2026 Fake Review Detector. All rights reserved.
+</footer>
+
+{% if user %}
+<script>
+async function loadSubscriptionStatus() {
+    try {
+        const response = await fetch('/subscription-status');
+        const data = await response.json();
+        const statusCard = document.getElementById('statusCard');
+
+        if (data.subscription) {
+            const subscription = data.subscription;
+            const startDate = new Date(subscription.start_date).toLocaleDateString();
+            const endDate = new Date(subscription.end_date).toLocaleDateString();
+
+            const progressPercent = Math.max(0, Math.min(100, ((30 - data.days_remaining) / 30) * 100));
+
+            statusCard.innerHTML = `
+                <div class="status-header">
+                    <h3>${subscription.plan_name}</h3>
+                    <span class="status-badge ${data.is_active ? 'active' : 'expired'}">
+                        ${data.is_active ? 'Active' : 'Expired'}
+                    </span>
+                </div>
+                <p><strong>Started:</strong> ${startDate}</p>
+                <p><strong>Expires:</strong> ${endDate}</p>
+                <p><strong>Days Remaining:</strong> ${data.days_remaining}</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${progressPercent}%"></div>
+                </div>
+                <button class="btn-secondary" onclick="upgradePlan()">Upgrade</button>
+                <button class="btn-danger" onclick="cancelSubscription()">Cancel</button>
+            `;
+
+            if (data.days_remaining < 5) {
+                document.getElementById('upgradeSection').style.display = 'block';
+            }
+        } else {
+            statusCard.innerHTML = `
+                <h3>No Active Subscription</h3>
+                <a href="/" class="btn-primary">View Plans</a>
+            `;
+        }
+    } catch (error) {
+        document.getElementById('statusCard').innerHTML = "Error loading subscription info";
+    }
+}
+
+function upgradePlan() {
+    window.location.href = '/';
+}
+
+function cancelSubscription() {
+    if (confirm('Cancel subscription?')) {
+        fetch('/cancel-subscription', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.success ? "Cancelled successfully" : "Error cancelling");
+            location.reload();
+        });
+    }
+}
+
+loadSubscriptionStatus();
+</script>
+{% endif %}
+
+</body>
+</html>

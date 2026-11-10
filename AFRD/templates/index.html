@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fake Review Detector</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Fake E-commerce Review Detection</h1>
+      <p class="subtitle">
+        Enter a product URL to analyze whether its reviews are fake or genuine.
+      </p>
+
+      {% if error %}
+      <div
+        class="message error"
+        style="
+          display: block;
+          margin-bottom: 20px;
+          max-width: 500px;
+          margin-left: auto;
+          margin-right: auto;
+        "
+      >
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form action="/predict" method="POST" class="form-box">
+        <input
+          type="text"
+          name="url"
+          placeholder="Paste product URL here"
+          required
+        />
+        <button type="submit">Analyze Reviews</button>
+      </form>
+
+      <p class="note">
+        This system uses machine learning to analyze online reviews.
+      </p>
+
+      {% if user %}
+      <!-- User is logged in - show info bar -->
+      <div class="user-bar">
+        <span class="user-info-bar">Hi, {{ user.split('@')[0] }}!</span>
+        {% if subscription_status and subscription_status.is_active %}
+        <span style="color: #4caf50; font-weight: 500"
+          >✓ Subscribed (Unlimited)</span
+        >
+        {% else %}
+        <span style="color: #ff9800"
+          >{{ usage_info.remaining }} free uses left today</span
+        >
+        <a href="/subscribe">Upgrade</a>
+        {% endif %}
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+      </div>
+      {% else %}
+      <!-- User not logged in - show auth buttons -->
+      <div class="auth-buttons">
+        <a href="/login" class="btn-login-small">Login</a>
+        <a href="/subscribe" class="btn-subscribe">Subscribe</a>
+      </div>
+      {% endif %}
+    </div>
+  </body>
+</html>

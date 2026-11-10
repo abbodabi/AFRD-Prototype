@@ -1,0 +1,816 @@
+/* ==================== BASE STYLES ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30px;
+}
+
+.note {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-top: 20px;
+}
+
+/* ==================== FORM STYLES ==================== */
+.form-box {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.form-box input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-box input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.form-box button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.form-box button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+/* ==================== RESULT STYLES ==================== */
+.review-box {
+    background: white;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.review-text {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+    font-style: italic;
+}
+
+.prediction {
+    font-size: 0.95rem;
+    padding: 8px 15px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.prediction.fake {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.prediction.real {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.overall {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #ff5722;
+    margin: 20px 0;
+}
+
+.back {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 30px;
+    background: white;
+    color: #667eea;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.back:hover {
+    transform: translateY(-2px);
+}
+
+/* ==================== AUTH PAGES ==================== */
+.auth-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 450px;
+}
+
+.auth-box {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.auth-box h1 {
+    color: #333;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.auth-box .subtitle {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.form-group.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group.checkbox input {
+    width: auto;
+}
+
+.form-group.checkbox label {
+    margin-bottom: 0;
+    color: #666;
+}
+
+.btn-primary {
+    display: inline-block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+
+.auth-links a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    display: none;
+    text-align: center;
+}
+
+.message.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    display: block;
+}
+
+.message.error {
+    background: #ffebee;
+    color: #c62828;
+    display: block;
+}
+
+/* ==================== CHECKOUT / SUBSCRIBE PAGE ==================== */
+.checkout-container,
+.subscribe-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.checkout-header,
+.subscribe-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.checkout-header h1,
+.subscribe-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.user-info {
+    background: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.user-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin-top: 15px;
+    display: inline-block;
+}
+
+.user-badge a {
+    color: white;
+    margin-left: 15px;
+}
+
+.plans-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 25px;
+    margin-bottom: 40px;
+    align-items: stretch;
+}
+
+.plan-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.plan-card.recommended {
+    border: 3px solid #667eea;
+}
+
+.plan-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 20px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.plan-badge.trial {
+    background: #ff9800;
+}
+
+.plan-badge.popular {
+    background: #667eea;
+}
+
+.plan-badge.enterprise {
+    background: #9c27b0;
+}
+
+.plan-name {
+    color: #333;
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+}
+
+.plan-price {
+    margin-bottom: 25px;
+}
+
+.plan-price .currency {
+    font-size: 1.5rem;
+    color: #666;
+    vertical-align: top;
+}
+
+.plan-price .amount {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.plan-price .period {
+    color: #666;
+}
+
+.plan-features {
+    list-style: none;
+    text-align: left;
+    margin-bottom: 30px;
+    flex-grow: 1;
+}
+
+.plan-features li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #555;
+}
+
+.plan-features li:last-child {
+    border-bottom: none;
+}
+
+.check-icon {
+    width: 20px;
+    height: 20px;
+    color: #4caf50;
+    flex-shrink: 0;
+}
+
+.btn-select-plan,
+.btn-select {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-select-plan:hover,
+.btn-select:hover {
+    transform: translateY(-2px);
+}
+
+.checkout-footer,
+.subscribe-footer {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.checkout-footer p,
+.subscribe-footer p {
+    margin-bottom: 10px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: white;
+    text-decoration: none;
+}
+
+/* ==================== DASHBOARD ==================== */
+.dashboard-page {
+    background: #f5f7fa;
+    min-height: 100vh;
+}
+
+.navbar {
+    background: white;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-brand h1 {
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: #555;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #667eea;
+}
+
+.user-greeting {
+    color: #666;
+}
+
+.btn-logout {
+    color: #dc3545 !important;
+}
+
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    color: #333;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+    color: #333;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.status-badge.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge.inactive {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.plan-name {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.status-detail {
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.valid-until {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.status-inactive .btn-primary {
+    margin-top: 15px;
+}
+
+.usage-unlimited {
+    text-align: center;
+    padding: 20px;
+}
+
+.unlimited-badge {
+    font-size: 4rem;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.usage-limited {
+    text-align: center;
+}
+
+.usage-count {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 5px;
+}
+
+.usage-progress {
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+
+.reset-time {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+.usage-note {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-action {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #333;
+    transition: background 0.2s;
+}
+
+.btn-action:hover {
+    background: #e9ecef;
+}
+
+.action-icon {
+    font-size: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.cancel-section {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-danger {
+    padding: 12px 30px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+.login-prompt {
+    text-align: center;
+    background: white;
+    padding: 60px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.login-prompt p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.prompt-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.btn-secondary {
+    padding: 12px 30px;
+    background: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-link {
+    color: #667eea;
+    text-decoration: none;
+}
+
+/* ==================== INDEX.HTML SUBSCRIBE BUTTON ==================== */
+.auth-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-subscribe {
+    padding: 12px 30px;
+    background: #ff9800;
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-subscribe:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 152, 0, 0.4);
+}
+
+.btn-login-small {
+    padding: 12px 25px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btn-login-small:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.user-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.user-bar .user-info-bar {
+    color: white;
+    font-weight: 500;
+}
+
+.user-bar a {
+    color: #ff9800;
+    text-decoration: none;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 992px) {
+    .plans-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .plans-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+}

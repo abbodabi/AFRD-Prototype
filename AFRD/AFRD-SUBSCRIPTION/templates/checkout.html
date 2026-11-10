@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Fake Review Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>🔍 Fake Review Detector</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="btn-secondary">Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="checkout-container">
+        <h1>Complete Your Subscription</h1>
+        
+        <div class="checkout-content">
+            <!-- Plan Selection -->
+            <div class="checkout-plans">
+                <h2>Select Your Plan</h2>
+                
+                <div class="plans-list">
+                    {% for plan_id, plan in plans.items() %}
+                    <div class="plan-option" onclick="selectPlan('{{ plan_id }}')">
+                        <div class="plan-radio">
+                            <input type="radio" id="plan_{{ plan_id }}" name="subscription_plan" value="{{ plan_id }}" required>
+                        </div>
+                        <div class="plan-details">
+                            <h3>{{ plan.name }}</h3>
+                            <p class="plan-description">{{ plan.duration_days }}-day access with {{ plan.features|length }} features</p>
+                        </div>
+                        <div class="plan-price">
+                            <span class="price-amount">${{ "%.2f"|format(plan.price) }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="checkout-payment">
+                <h2>Payment Details</h2>
+                
+                <form id="paymentForm">
+                    <div class="form-section">
+                        <h3>Billing Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required value="{{ user or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Payment Method</h3>
+                        <label class="radio-inline">
+                            <input type="radio" name="payment_method" value="card" checked> Card
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="payment_method" value="qr"> QR Payment
+                        </label>
+                    </div>
+                    
+                    <div id="cardInfoSection" class="form-section">
+                        <h3>Card Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="cardNumber">Card Number</label>
+                            <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiry">Expiry Date</label>
+                                <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" name="cvv" placeholder="123" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="zipCode">Zip Code</label>
+                            <input type="text" id="zipCode" name="zipCode" required>
+                        </div>
+                    </div>
+
+                    <div id="qrSection" class="form-section hidden">
+                        <h3>Scan QR to Pay</h3>
+                        <p>Please use your mobile banking or payment app to scan the code below and complete the transaction.</p>
+                        <img src="https://via.placeholder.com/200x200.png?text=QR+Code" alt="QR Code" class="qr-image">
+                        <p class="small-text">Transaction reference will be emailed to you after payment.</p>
+                    </div>
+                    
+                    <div class="form-section">
+                        <label class="checkbox-large">
+                            <input type="checkbox" id="autoRenew" name="autoRenew" checked>
+                            <span>Auto-renew my subscription (cancel anytime)</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    <div class="order-summary">
+                        <h3>Order Summary</h3>
+                        <div class="summary-row">
+                            <span>Selected Plan:</span>
+                            <strong id="summaryPlan">-</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span>Duration:</span>
+                            <strong id="summaryDuration">-</strong>
+                        </div>
+                        <div class="summary-row">
+                            <span>Access Until:</span>
+                            <strong id="summaryEndDate">-</strong>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-row total">
+                            <span>Total Amount:</span>
+                            <strong id="summaryTotal">$0.00</strong>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary btn-block btn-large">Complete Purchase</button>
+                    <p class="security-info">🔒 Your payment is secure and encrypted</p>
+                    
+                    <div id="message" class="message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Fake Review Detector. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const plans = {
+            {% for plan_id, plan in plans.items() %}
+            '{{ plan_id }}': {
+                name: '{{ plan.name }}',
+                price: {{ plan.price }},
+                duration: {{ plan.duration_days }}
+            }{{ "," if not loop.last }}
+            {% endfor %}
+        };
+
+        // payment method toggling
+        document.querySelectorAll('input[name="payment_method"]').forEach(el => {
+            el.addEventListener('change', togglePaymentSections);
+        });
+
+        function togglePaymentSections() {
+            const method = document.querySelector('input[name="payment_method"]:checked').value;
+            document.getElementById('cardInfoSection').classList.toggle('hidden', method !== 'card');
+            document.getElementById('qrSection').classList.toggle('hidden', method !== 'qr');
+        }
+
+        function selectPlan(planId) {
+            document.getElementById('plan_' + planId).checked = true;
+            updateSummary(planId);
+        }
+
+        function updateSummary(planId) {
+            const plan = plans[planId];
+            
+            // Calculate end date
+            const today = new Date();
+            const endDate = new Date(today.getTime() + plan.duration * 24 * 60 * 60 * 1000);
+            const endDateStr = endDate.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('summaryPlan').textContent = plan.name;
+            document.getElementById('summaryDuration').textContent = plan.duration + ' days';
+            document.getElementById('summaryEndDate').textContent = endDateStr;
+            document.getElementById('summaryTotal').textContent = '$' + plan.price.toFixed(2);
+        }
+
+        // Set initial plan
+        document.querySelectorAll('input[name="subscription_plan"]').forEach((radio, index) => {
+            if (index === 0) {
+                radio.checked = true;
+                updateSummary(radio.value);
+            }
+            radio.addEventListener('change', (e) => {
+                updateSummary(e.target.value);
+            });
+        });
+        // ensure correct payment method section on load
+        togglePaymentSections();
+
+        document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const selectedPlan = document.querySelector('input[name="subscription_plan"]:checked').value;
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            
+            try {
+                // if QR payment, disable card inputs so browser validation doesn't block
+            if (paymentMethod === 'qr') {
+                document.querySelectorAll('#cardInfoSection input').forEach(inp => {
+                    inp.disabled = true;
+                    inp.required = false;
+                });
+            }
+            const response = await fetch('/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        plan_type: selectedPlan,
+                        fullName: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        autoRenew: document.getElementById('autoRenew').checked,
+                        payment_method: paymentMethod
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('Payment successful! Your subscription is now active.', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 2000);
+                } else {
+                    showMessage(data.message || 'Payment failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+        }
+
+        // Card number formatting
+        document.getElementById('cardNumber').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.replace(/(\d{4})/g, '$1 ').trim();
+            e.target.value = formattedValue;
+        });
+
+        // Expiry date formatting
+        document.getElementById('expiry').addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // CVV number only
+        document.getElementById('cvv').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+        });
+    </script>
+</body>
+</html>

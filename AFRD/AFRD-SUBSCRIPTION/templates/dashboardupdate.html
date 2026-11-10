@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Fake Review Detector</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body class="dashboard-page">
+    <nav class="navbar">
+      <div class="nav-brand">
+        <h1>Fake Review Detector</h1>
+      </div>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/dashboard" class="active">Dashboard</a>
+        <a href="/checkout">Plans</a>
+        {% if user %}
+        <span class="user-greeting">Hi, {{ user.split('@')[0] }}</span>
+        <a href="/logout" class="btn-logout">Logout</a>
+        {% else %}
+        <a href="/login">Login</a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <h1>Your Dashboard</h1>
+        <p class="subtitle">Manage your subscription and usage</p>
+      </div>
+
+      {% if user %}
+      <div class="dashboard-grid">
+        <!-- Subscription Status Card -->
+        <div class="card subscription-card">
+          <h2>Subscription Status</h2>
+          {% if subscription_status and subscription_status.subscription %}
+          <div class="status-active">
+            <div class="status-badge active">ACTIVE</div>
+            <p class="plan-name">
+              {{ subscription_status.subscription.plan_name }}
+            </p>
+            <p class="status-detail">
+              {% if subscription_status.days_remaining > 0 %} {{
+              subscription_status.days_remaining }} days remaining {% else %}
+              Expired {% endif %}
+            </p>
+            <p class="valid-until">
+              Valid until: {{ subscription_status.subscription.end_date }}
+            </p>
+          </div>
+          {% else %}
+          <div class="status-inactive">
+            <div class="status-badge inactive">NO SUBSCRIPTION</div>
+            <p class="status-detail">Upgrade to unlock unlimited access</p>
+            <a href="/checkout" class="btn-primary">View Plans</a>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Usage Card -->
+        <div class="card usage-card">
+          <h2>Today's Usage</h2>
+          {% if usage_info.is_subscribed %}
+          <div class="usage-unlimited">
+            <div class="unlimited-badge">∞</div>
+            <p>Unlimited Access</p>
+            <p class="usage-note">
+              Your subscription includes unlimited detections
+            </p>
+          </div>
+          {% else %}
+          <div class="usage-limited">
+            <div class="usage-count">{{ usage_info.remaining }}</div>
+            <p>free uses remaining today</p>
+            <div class="usage-progress">
+              <div
+                class="progress-bar"
+                style="width: {{ (usage_info.remaining / 5) * 100 }}%"
+              ></div>
+            </div>
+            <p class="reset-time">
+              Resets in {{ "%.1f"|format(usage_info.reset_in_hours) }} hours
+            </p>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card actions-card">
+          <h2>Quick Actions</h2>
+          <div class="action-buttons">
+            <a href="/" class="btn-action">
+              <span class="action-icon">🔍</span>
+              <span>Analyze Reviews</span>
+            </a>
+            <a href="/checkout" class="btn-action">
+              <span class="action-icon">⭐</span>
+              <span>Upgrade Plan</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats Card (for future use) -->
+        <div class="card stats-card">
+          <h2>Statistics</h2>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Total Analyses</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">0</div>
+              <div class="stat-label">Fake Detected</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if subscription_status and subscription_status.subscription %}
+      <div class="cancel-section">
+        <button id="cancelBtn" class="btn-danger">Cancel Subscription</button>
+        <div id="cancelMessage" class="message"></div>
+      </div>
+      {% endif %} {% else %}
+      <div class="login-prompt">
+        <p>Please login to view your dashboard</p>
+        <div class="prompt-buttons">
+          <a href="/login" class="btn-primary">Login</a>
+          <a href="/register" class="btn-secondary">Register</a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if user and subscription_status and subscription_status.subscription %}
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+      document
+        .getElementById("cancelBtn")
+        ?.addEventListener("click", async () => {
+          if (!confirm("Are you sure you want to cancel your subscription?")) {
+            return;
+          }
+
+          try {
+            const response = await fetch("/api/cancel-subscription", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              showMessage("Subscription cancelled successfully", "success");
+              setTimeout(() => {
+                window.location.href = "/dashboard";
+              }, 1500);
+            } else {
+              showMessage(data.message, "error");
+            }
+          } catch (error) {
+            showMessage("An error occurred. Please try again.", "error");
+          }
+        });
+
+      function showMessage(text, type) {
+        const messageDiv = document.getElementById("cancelMessage");
+        messageDiv.textContent = text;
+        messageDiv.className = "message " + type;
+        messageDiv.style.display = "block";
+      }
+
+      emailjs.init("QlpQHn8j7ooS8Or1v"); // EmailJS public key
+
+async function checkAndNotifyExpiration() {
+    try {
+        const response = await fetch('/subscription-status');
+        const data = await response.json();
+
+        if (!data.subscription) return; // no subscription
+
+        const sub = data.subscription;
+        const now = new Date();
+        const endDate = new Date(sub.end_date);
+        const timeDiff = endDate - now;
+        const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+        let notify = false;
+
+        // Check notification rules
+        if (sub.plan_name.toLowerCase().includes("free trial") && daysRemaining === 1) {
+            notify = true;
+        } else if (sub.plan_name.toLowerCase().includes("month") && daysRemaining === 5) {
+            notify = true;
+        }
+
+        if (notify) {
+            // Show banner on dashboard
+            showExpirationBanner(sub.plan_name, daysRemaining, endDate);
+
+            // Send email
+            await emailjs.send(
+                "service_oz2j1wd",
+                "template_p9z00m9",
+                {
+                    to_email: "{{ user_email }}",       // Replace with your dynamic user email
+                    to_name: "{{ user }}",             // Replace with your dynamic user name
+                    plan_name: sub.plan_name,
+                    days_remaining: daysRemaining,
+                    expiration_date: endDate.toLocaleDateString(),
+                    login_link: window.location.origin + "/login"
+                }
+            );
+
+            console.log("Subscription expiration email sent!");
+        }
+
+    } catch (error) {
+        console.error("Error checking subscription expiration:", error);
+    }
+}
+
+// Function to display banner on dashboard
+function showExpirationBanner(planName, daysRemaining, endDate) {
+    const dashboardContainer = document.querySelector('.dashboard-container');
+    if (!dashboardContainer) return;
+
+    // Create banner element
+    const banner = document.createElement('div');
+    banner.style.background = 'linear-gradient(90deg, #0066ff, #00b0ff)';
+    banner.style.color = '#ffffff';
+    banner.style.padding = '15px 20px';
+    banner.style.borderRadius = '10px';
+    banner.style.marginBottom = '20px';
+    banner.style.textAlign = 'center';
+    banner.style.fontSize = '16px';
+    banner.style.fontWeight = 'bold';
+    banner.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+    banner.innerHTML = `
+        ⚠️ Your <strong>${planName}</strong> subscription will expire in <strong>${daysRemaining} day(s)</strong> on <strong>${endDate.toLocaleDateString()}</strong>. 
+        <a href="/login" style="color:#fff; text-decoration:underline; margin-left:10px;">Login to Renew</a>
+    `;
+
+    // Insert banner at the top of dashboard
+    dashboardContainer.prepend(banner);
+}
+
+// Call on dashboard load
+checkAndNotifyExpiration();
+
+// Optional: repeat check every 12 hours if user stays on page
+setInterval(checkAndNotifyExpiration, 12 * 60 * 60 * 1000);
+
+    </script>
+    {% endif %}
+  </body>
+</html>

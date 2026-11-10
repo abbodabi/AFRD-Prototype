@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Detection Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Review Analysis Result</h1>
+
+    <h2>Overall Fake Review Percentage</h2>
+    <p class="overall">{{ fake_percentage }}%</p>
+
+    <h2>Individual Review Analysis</h2>
+
+    {% for r in reviews %}
+        <div class="review-box">
+            <p class="review-text">“{{ r.content }}”</p>
+            <p class="prediction {{ r.prediction|lower }}">
+                Prediction: <strong>{{ r.prediction }}</strong>
+                ({{ r.confidence }}%)
+            </p>
+        </div>
+    {% endfor %}
+
+    <a href="/" class="back">Analyze Another Product</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Fake Review Detector</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  </head>
+  <body class="auth-page">
+    <div class="auth-container">
+      <div class="auth-box">
+        <h1>Create Your Account</h1>
+        <p class="subtitle">Start detecting fake reviews today</p>
+
+        <!-- Registration Form -->
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder="John Doe"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="you@example.com"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              placeholder="Min. 8 characters"
+              minlength="8"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input
+              type="password"
+              id="confirm_password"
+              name="confirm_password"
+              required
+              placeholder="Confirm your password"
+            />
+          </div>
+
+          <button type="button" class="btn-primary btn-block" id="sendOtpBtn">
+            Send OTP
+          </button>
+
+          <div id="message" class="message"></div>
+        </form>
+
+        <!-- OTP Verification Section (hidden by default) -->
+        <div id="otpSection" style="display: none; margin-top: 20px">
+          <div class="form-group">
+            <label for="otp">Enter 6-digit OTP</label>
+            <input
+              type="text"
+              id="otp"
+              name="otp"
+              required
+              placeholder="123456"
+              maxlength="6"
+            />
+          </div>
+
+          <button type="button" class="btn-primary btn-block" id="verifyOtpBtn">
+            Verify & Register
+          </button>
+
+          <div id="otpMessage" class="message"></div>
+
+          <p style="text-align: center; margin-top: 15px; color: #666">
+            <small
+              >Didn't receive OTP?
+              <a href="#" id="resendOtp" style="color: #4caf50"
+                >Resend</a
+              ></small
+            >
+          </p>
+        </div>
+
+        <!-- Registration Success (hidden by default) -->
+        <div id="registrationSuccess" style="display: none; text-align: center">
+          <div style="color: #4caf50; font-size: 48px; margin-bottom: 20px">
+            ✓
+          </div>
+          <h2 style="color: #4caf50">Registration Successful!</h2>
+          <p>Your account has been created and verified.</p>
+          <p>You can now <a href="/login">login</a> to access the dashboard.</p>
+        </div>
+
+        <div class="auth-links">
+          <span>Already have an account?</span>
+          <a href="/login">Login</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize EmailJS after DOM loads
+      document.addEventListener("DOMContentLoaded", function () {
+        try {
+          emailjs.init("uERnhntxcwIxoIZnb");
+          console.log("✅ EmailJS initialized successfully");
+        } catch (err) {
+          console.error("❌ EmailJS initialization failed:", err);
+        }
+      });
+
+      // Generate 6-digit OTP
+      function generateOTP() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+      }
+
+      // Store registration data temporarily
+      let tempRegistrationData = null;
+
+      // Send OTP Function
+      async function sendOTP() {
+        const email = document.getElementById("email").value.trim();
+        const name = document.getElementById("name").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirm_password").value;
+        const message = document.getElementById("message");
+
+        message.innerHTML = "";
+        message.style.display = "none";
+
+        // Validate inputs
+        if (!name) {
+          showMessage("Please enter your name", "error");
+          return;
+        }
+
+        if (!email || !email.includes("@")) {
+          showMessage("Please enter a valid email", "error");
+          return;
+        }
+
+        if (!password || password.length < 8) {
+          showMessage("Password must be at least 8 characters", "error");
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          showMessage("Passwords do not match", "error");
+          return;
+        }
+
+        const otp = generateOTP();
+        const expiryTime = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+        const expiryString = expiryTime.toLocaleString();
+
+        // Store registration data in sessionStorage
+        tempRegistrationData = {
+          email: email,
+          name: name,
+          password: password,
+          otp: otp,
+          expiresAt: expiryTime.getTime(),
+        };
+
+        sessionStorage.setItem("otpData", JSON.stringify(tempRegistrationData));
+
+        console.log("🔹 Sending OTP:", otp, "to", email);
+
+        try {
+          const response = await emailjs.send(
+            "service_2obuxc2",
+            "template_eh2bopl",
+            {
+              to_email: email,
+              to_name: name,
+              otp_code: otp,
+              time: expiryString,
+            },
+          );
+          console.log("✅ EmailJS Success:", response);
+
+          // Show OTP section
+          document.getElementById("registerForm").style.display = "none";
+          document.getElementById("otpSection").style.display = "block";
+
+          showMessage("✅ OTP sent successfully! Check your inbox.", "success");
+        } catch (error) {
+          console.error("❌ EmailJS Failed:", error);
+          showMessage("❌ Failed to send OTP. Please try again.", "error");
+        }
+      }
+
+      // Verify OTP and Complete Registration
+      async function verifyOTP() {
+        const enteredOTP = document.getElementById("otp").value.trim();
+        const message = document.getElementById("otpMessage");
+
+        const stored = sessionStorage.getItem("otpData");
+        if (!stored) {
+          showOTPMessage(
+            "❌ No OTP session found. Please start over.",
+            "error",
+          );
+          return;
+        }
+
+        const data = JSON.parse(stored);
+
+        // Check if OTP expired
+        if (Date.now() > data.expiresAt) {
+          sessionStorage.removeItem("otpData");
+          showOTPMessage("❌ OTP expired. Please request a new one.", "error");
+          return;
+        }
+
+        if (enteredOTP === data.otp) {
+          // OTP verified - now create the account
+          try {
+            const response = await fetch("/register", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email: data.email,
+                password: data.password,
+                name: data.name,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              // Clear session storage
+              sessionStorage.removeItem("otpData");
+              tempRegistrationData = null;
+
+              // Show success
+              document.getElementById("otpSection").style.display = "none";
+              document.getElementById("registrationSuccess").style.display =
+                "block";
+
+              console.log("✅ Registration successful:", data.email);
+            } else {
+              showOTPMessage(
+                result.message || "❌ Registration failed",
+                "error",
+              );
+            }
+          } catch (error) {
+            console.error("Registration error:", error);
+            showOTPMessage("❌ An error occurred. Please try again.", "error");
+          }
+        } else {
+          showOTPMessage("❌ Invalid OTP", "error");
+        }
+      }
+
+      // Resend OTP
+      async function resendOTP() {
+        const stored = sessionStorage.getItem("otpData");
+        if (!stored) {
+          showOTPMessage("❌ Session expired. Please start over.", "error");
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+          return;
+        }
+
+        const data = JSON.parse(stored);
+
+        // Generate new OTP
+        const newOTP = generateOTP();
+        const expiryTime = new Date(Date.now() + 15 * 60 * 1000);
+        const expiryString = expiryTime.toLocaleString();
+
+        data.otp = newOTP;
+        data.expiresAt = expiryTime.getTime();
+
+        sessionStorage.setItem("otpData", JSON.stringify(data));
+
+        try {
+          await emailjs.send("service_2obuxc2", "template_eh2bopl", {
+            to_email: data.email,
+            to_name: data.name,
+            otp_code: newOTP,
+            time: expiryString,
+          });
+          showOTPMessage("✅ New OTP sent! Check your inbox.", "success");
+        } catch (error) {
+          showOTPMessage("❌ Failed to resend OTP. Please try again.", "error");
+        }
+      }
+
+      // Helper functions
+      function showMessage(text, type) {
+        const messageDiv = document.getElementById("message");
+        messageDiv.textContent = text;
+        messageDiv.className = "message " + type;
+        messageDiv.style.display = "block";
+      }
+
+      function showOTPMessage(text, type) {
+        const messageDiv = document.getElementById("otpMessage");
+        messageDiv.textContent = text;
+        messageDiv.className = "message " + type;
+        messageDiv.style.display = "block";
+      }
+
+      // Event Listeners
+      document.getElementById("sendOtpBtn").addEventListener("click", sendOTP);
+      document
+        .getElementById("verifyOtpBtn")
+        .addEventListener("click", verifyOTP);
+      document
+        .getElementById("resendOtp")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          resendOTP();
+        });
+
+      // Check for existing OTP session on page load
+      window.onload = function () {
+        const stored = sessionStorage.getItem("otpData");
+        if (stored) {
+          const data = JSON.parse(stored);
+          if (Date.now() < data.expiresAt) {
+            // Restore OTP section
+            document.getElementById("registerForm").style.display = "none";
+            document.getElementById("otpSection").style.display = "block";
+            document.getElementById("email").value = data.email;
+            showMessage(
+              "✅ Session restored. Enter the OTP sent to your email.",
+              "success",
+            );
+          } else {
+            sessionStorage.removeItem("otpData");
+          }
+        }
+      };
+    </script>
+  </body>
+</html>

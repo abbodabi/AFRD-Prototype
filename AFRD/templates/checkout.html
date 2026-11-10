@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout - Fake Review Detector</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body class="auth-page">
+    <div class="checkout-container">
+      <div class="checkout-header">
+        <h1>Choose Your Plan</h1>
+        <p class="subtitle">Select a subscription plan that fits your needs</p>
+      </div>
+
+      {% if user %}
+      <div class="user-info">
+        <span>Logged in as: <strong>{{ user }}</strong></span>
+        <a href="/logout" class="btn-link">Logout</a>
+      </div>
+      {% endif %}
+
+      <div class="plans-grid">
+        {% for plan_id, plan in plans.items() %}
+        <div class="plan-card {% if plan.recommended %}recommended{% endif %}">
+          {% if plan.badge %}
+          <div class="plan-badge {{ plan.badge|lower }}">{{ plan.badge }}</div>
+          {% endif %}
+
+          <h2 class="plan-name">{{ plan.name }}</h2>
+          <div class="plan-price">
+            <span class="currency">₱</span>
+            <span class="amount">{{ plan.price }}</span>
+            {% if plan.duration_days < 30 %}
+            <span class="period">/ {{ plan.duration_days }} days</span>
+            {% elif plan.duration_days == 365 %}
+            <span class="period">/ year</span>
+            {% else %}
+            <span class="period">/ month</span>
+            {% endif %}
+          </div>
+
+          <ul class="plan-features">
+            {% for feature in plan.features %}
+            <li>
+              <svg class="check-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              {{ feature }}
+            </li>
+            {% endfor %}
+          </ul>
+
+          <button class="btn-primary btn-select" data-plan="{{ plan_id }}">
+            Select Plan
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- QR Code Payment Modal -->
+      <div id="qr-modal" class="qr-modal" style="display: none">
+        <div class="qr-modal-content">
+          <span class="qr-close" onclick="closeQRModal()">&times;</span>
+          <h2>Complete Your Payment</h2>
+          <p class="qr-instructions">Scan the QR code below to pay</p>
+
+          <div class="qr-image-container">
+            <img
+              src="{{ url_for('static', filename='sample_qr.jpg') }}"
+              alt="Payment QR Code"
+              class="qr-image"
+            />
+          </div>
+
+          <div class="qr-plan-details">
+            <p>
+              <strong>Selected Plan:</strong> <span id="qr-plan-name"></span>
+            </p>
+            <p><strong>Amount:</strong> <span id="qr-plan-price"></span></p>
+          </div>
+
+          <p class="qr-note">📱 Scan with your banking app to pay</p>
+
+          <button class="btn-primary" onclick="confirmPayment()">
+            I Have Paid
+          </button>
+
+          <div id="qr-message" class="message"></div>
+        </div>
+      </div>
+
+      <div class="checkout-footer">
+        <p>🔒 Secure payment processing</p>
+        <p>30-day money-back guarantee</p>
+      </div>
+    </div>
+
+    <script>
+      let selectedPlan = null;
+      let selectedPlanName = null;
+      let selectedPlanPrice = null;
+
+      document.querySelectorAll('.btn-select').forEach(button => {
+          button.addEventListener('click', () => {
+              const isLoggedIn = {% if user %}true{% else %}false{% endif %};
+
+              if (!isLoggedIn) {
+                  window.location.href = '/login?redirect=/checkout';
+                  return;
+              }
+
+              // Get plan details
+              selectedPlan = button.dataset.plan;
+              const planCard = button.closest('.plan-card');
+              selectedPlanName = planCard.querySelector('.plan-name').textContent;
+              selectedPlanPrice = planCard.querySelector('.amount').textContent;
+
+              // Show QR modal
+              document.getElementById('qr-plan-name').textContent = selectedPlanName;
+              document.getElementById('qr-plan-price').textContent = '₱' + selectedPlanPrice;
+              document.getElementById('qr-modal').style.display = 'flex';
+          });
+      });
+
+      function closeQRModal() {
+          document.getElementById('qr-modal').style.display = 'none';
+          document.getElementById('qr-message').style.display = 'none';
+      }
+
+      async function confirmPayment() {
+          if (!selectedPlan) return;
+
+          try {
+              const response = await fetch('/checkout', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ plan_type: selectedPlan })
+              });
+
+              const data = await response.json();
+
+              if (data.success) {
+                  showQRMessage(`Subscription activated! Valid until ${data.end_date}`, 'success');
+                  setTimeout(() => {
+                      window.location.href = '/dashboard';
+                  }, 2000);
+              } else {
+                  showQRMessage(data.message, 'error');
+              }
+          } catch (error) {
+              showQRMessage('An error occurred. Please try again.', 'error');
+          }
+      }
+
+      function showQRMessage(text, type) {
+          const messageDiv = document.getElementById('qr-message');
+          messageDiv.textContent = text;
+          messageDiv.className = 'message ' + type;
+          messageDiv.style.display = 'block';
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+          const modal = document.getElementById('qr-modal');
+          if (event.target == modal) {
+              closeQRModal();
+          }
+      }
+    </script>
+
+    <style>
+      .qr-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        align-items: center;
+        justify-content: center;
+      }
+
+      .qr-modal-content {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        position: relative;
+      }
+
+      .qr-close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        color: #aaa;
+        cursor: pointer;
+      }
+
+      .qr-close:hover {
+        color: #333;
+      }
+
+      .qr-image-container {
+        margin: 20px 0;
+      }
+
+      .qr-image {
+        width: 200px;
+        height: 200px;
+        object-fit: contain;
+        border: 2px solid #eee;
+        border-radius: 10px;
+      }
+
+      .qr-plan-details {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .qr-plan-details p {
+        margin: 5px 0;
+        color: #333;
+      }
+
+      .qr-instructions {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+      }
+
+      .qr-note {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+      }
+    </style>
+  </body>
+</html>

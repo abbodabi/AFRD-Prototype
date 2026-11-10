@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake Review Detection - Subscription Plans</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>🔍 Fake Review Detector</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/login" class="btn-secondary">Login</a>
+                <a href="/register" class="btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Detect Fake Reviews with AI-Powered Precision</h1>
+            <p>Protect your online reputation and make informed decisions with our advanced fake review detection system</p>
+            <a href="#pricing" class="btn-primary btn-large">Choose Your Plan</a>
+        </div>
+    </section>
+
+    <section id="pricing" class="pricing-section">
+        <div class="container">
+            <h2>Simple, Transparent Pricing</h2>
+            <p class="subtitle">Select the plan that best fits your needs</p>
+            
+            <div class="pricing-grid">
+                {% for plan_id, plan in plans.items() %}
+                <div class="pricing-card {% if plan.badge == 'POPULAR' %}popular{% endif %}">
+                    {% if plan.badge %}
+                    <div class="badge">{{ plan.badge }}</div>
+                    {% endif %}
+                    
+                    <h3>{{ plan.name }}</h3>
+                    <div class="price">
+                        <span class="amount">P{{ "%.2f"|format(plan.price) }}</span>
+                        <span class="duration">/ {{ plan.duration_days }} days</span>
+                    </div>
+                    
+                    <ul class="features-list">
+                        {% for feature in plan.features %}
+                        <li>
+                            <span class="checkmark">✓</span>
+                            {{ feature }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <button class="btn-subscribe" onclick="selectPlan('{{ plan_id }}')">
+                        Get Started
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="container">
+            <h2>Why Choose Our Detection System?</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI-Powered Detection</h3>
+                    <p>Advanced machine learning algorithms identify suspicious review patterns</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Real-Time Analysis</h3>
+                    <p>Instant results for quick decision-making</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <h3>Detailed Reports</h3>
+                    <p>Comprehensive analytics and insights about detected fake reviews</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Data Security</h3>
+                    <p>Your data is encrypted and protected with enterprise-grade security</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq-section">
+        <div class="container">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <h4>Can I upgrade from 3-day to 1-month plan?</h4>
+                    <p>Yes! You can upgrade anytime from your dashboard. You'll only pay the difference.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Is there a money-back guarantee?</h4>
+                    <p>Absolutely! We offer a 7-day money-back guarantee if you're not satisfied.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Can I cancel my subscription anytime?</h4>
+                    <p>Yes, cancel anytime from your account settings without any hidden charges.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Do you offer enterprise plans?</h4>
+                    <p>Yes! Contact our sales team for custom enterprise pricing and features.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Fake Review Detector. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function selectPlan(planId) {
+            // Check if user is logged in
+            fetch('/subscription-status')
+                .then(response => {
+                    if (response.status === 401) {
+                        // Not logged in, redirect to login
+                        window.location.href = '/login?redirect=checkout&plan=' + planId;
+                    } else {
+                        // User is logged in, go to checkout
+                        window.location.href = '/checkout';
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
